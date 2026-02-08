@@ -1,2 +1,3 @@
-# network-stabilizer
-Exported from Caffeine project: Network stabilizer
+## Network stabilizer
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

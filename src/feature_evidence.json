@@ -1,0 +1,167 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-a-network-stabilizer-dashboard-that-continuously-evaluates-the-user-s-network-stability-by-running-periodic-connectivity-checks-client-side-and-displaying-key-metrics-online-offline-status-request-success-rate-average-latency-jitter-latency-variance-and-recent-error-counts",
+      "featureTitle": "Create a network stabilizer dashboard that continuously evaluates the user’s network stability by running periodic connectivity checks (client-side) and displaying key metrics: online/offline status, request success rate, average latency, jitter (latency variance), and recent error counts.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/features/dashboard/DashboardView.tsx",
+        "frontend/src/features/monitoring/connectivityCheck.ts",
+        "frontend/src/features/monitoring/metrics.ts",
+        "frontend/src/features/monitoring/types.ts",
+        "frontend/src/features/monitoring/useConnectivityMonitor.ts",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-diagnostics-view-that-helps-users-identify-instability-sources-by-showing-a-timeline-chart-of-recent-measurements-and-a-table-of-recent-failures-including-error-type-and-timestamp",
+      "featureTitle": "Add a diagnostics view that helps users identify instability sources by showing a timeline/chart of recent measurements and a table of recent failures including error type and timestamp.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/features/diagnostics/DiagnosticsView.tsx",
+        "frontend/src/features/diagnostics/LatencySparkline.tsx",
+        "frontend/src/features/diagnostics/timeWindow.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-a-stabilization-settings-panel-that-lets-users-tune-client-behavior-for-unstable-networks-check-interval-request-timeout-retry-count-and-exponential-backoff-parameters-apply-these-settings-to-the-connectivity-checks",
+      "featureTitle": "Provide a “stabilization” settings panel that lets users tune client behavior for unstable networks: check interval, request timeout, retry count, and exponential backoff parameters; apply these settings to the connectivity checks.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/features/monitoring/useConnectivityMonitor.ts",
+        "frontend/src/features/settings/SettingsView.tsx",
+        "frontend/src/features/settings/settingsStorage.ts",
+        "frontend/src/features/settings/settingsTypes.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-export-import-utilities-allow-exporting-the-user-s-measurement-history-to-a-downloadable-csv-json-file-and-clearing-history-from-the-ui-with-confirmation",
+      "featureTitle": "Add export/import utilities: allow exporting the user’s measurement history to a downloadable CSV/JSON file and clearing history from the UI (with confirmation).",
+      "files": [
+        "frontend/src/features/diagnostics/DiagnosticsView.tsx",
+        "frontend/src/features/export/ImportExportPanel.tsx",
+        "frontend/src/features/export/exportFormats.ts",
+        "frontend/src/features/export/fileDownload.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-frontend-backend-wiring-using-react-query-for-writing-measurements-to-the-canister-reading-history-and-clearing-history-with-loading-error-states-and-graceful-degradation-when-not-signed-in",
+      "featureTitle": "Implement frontend-backend wiring using React Query for: writing measurements to the canister, reading history, and clearing history, with loading/error states and graceful degradation when not signed in.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/features/auth/LoginButton.tsx",
+        "frontend/src/features/dashboard/DashboardView.tsx",
+        "frontend/src/features/history/mutations.ts",
+        "frontend/src/features/history/networkHistoryMapper.ts",
+        "frontend/src/features/history/queries.ts",
+        "frontend/src/features/monitoring/useConnectivityMonitor.ts",
+        "frontend/src/features/profile/ProfileSetupModal.tsx",
+        "frontend/src/features/profile/queries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-choose-and-apply-a-coherent-visual-theme-for-the-app-ui-colors-typography-layout-appropriate-for-a-technical-monitoring-tool-and-use-it-consistently-across-all-views",
+      "featureTitle": "Choose and apply a coherent visual theme for the app UI (colors, typography, layout) appropriate for a technical monitoring tool, and use it consistently across all views.",
+      "files": [
+        "frontend/index.css",
+        "frontend/src/App.tsx",
+        "frontend/src/features/dashboard/DashboardView.tsx",
+        "frontend/src/features/diagnostics/DiagnosticsView.tsx",
+        "frontend/src/features/settings/SettingsView.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-generate-and-include-minimal-static-branding-assets-for-the-app-icon-and-a-simple-hero-empty-state-illustration-and-render-them-from-the-frontend-as-static-files",
+      "featureTitle": "Generate and include minimal static branding assets for the app (icon and a simple hero/empty-state illustration) and render them from the frontend as static files.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/features/dashboard/DashboardView.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

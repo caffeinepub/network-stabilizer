@@ -1,0 +1,275 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Network Stabilizer (frontend): live monitoring dashboard, diagnostics, settings, and export",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Build a live network stabilizer dashboard with periodic client-side checks and derived stability metrics (status, success rate, latency, jitter, errors).",
+      "acceptanceCriteria": [
+        "App shows an always-visible current status indicator (e.g., Stable / Degraded / Offline) derived from recent measurements.",
+        "Connectivity checks run on an interval (configurable) without using WebSockets.",
+        "UI displays at minimum: average latency, jitter, success rate, and last successful check timestamp.",
+        "When the browser is offline (navigator.onLine=false), UI reflects Offline immediately and pauses/fails checks gracefully."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the main app shell with tabbed navigation (Dashboard / Diagnostics / Settings), and render an always-visible top status indicator derived from recent connectivity measurements. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Create the CSS entry imported by frontend/src/main.tsx; include Tailwind directives and any app-level utility classes needed by the monitoring UI (without modifying frontend/src/main.tsx)."
+        },
+        {
+          "path": "frontend/src/features/monitoring/types.ts",
+          "operation": "create",
+          "description": "Define frontend measurement types for a connectivity check (timestamp, latency, success/failure, error category/message) and derived metrics (avg latency, jitter, success rate, recent error counts) used by the dashboard."
+        },
+        {
+          "path": "frontend/src/features/monitoring/connectivityCheck.ts",
+          "operation": "create",
+          "description": "Implement a client-side connectivity check using regular HTTP fetch (no WebSockets), capturing latency and failure reasons, and handling timeouts via AbortController."
+        },
+        {
+          "path": "frontend/src/features/monitoring/metrics.ts",
+          "operation": "create",
+          "description": "Implement calculations for rolling success rate, average latency, jitter (latency variance), recent error counts, and stability classification (Stable/Degraded/Offline) from recent samples."
+        },
+        {
+          "path": "frontend/src/features/monitoring/useConnectivityMonitor.ts",
+          "operation": "create",
+          "description": "Create a React hook that schedules periodic checks with configurable interval, responds immediately to browser online/offline events, pauses gracefully when offline, and exposes current samples + derived metrics to the UI."
+        },
+        {
+          "path": "frontend/src/features/dashboard/DashboardView.tsx",
+          "operation": "create",
+          "description": "Create the dashboard view showing primary status, key metrics cards (avg latency, jitter, success rate, last success), and recent error summary using composed shadcn/ui components (do not modify frontend/src/components/ui). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add a diagnostics view with a latency timeline visualization, failure indicators, and a recent checks/failures table with time-window filtering.",
+      "acceptanceCriteria": [
+        "Diagnostics view includes a chart (or sparkline-style visualization) for latency over time and indicates failed checks.",
+        "A table lists recent checks with: timestamp, latency (if available), success/failure, and error category/message.",
+        "User can choose a time window (e.g., last 15 min / 1 hr / 24 hr) that changes the displayed history (within stored bounds)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/diagnostics/LatencySparkline.tsx",
+          "operation": "create",
+          "description": "Create a lightweight sparkline/timeline visualization (e.g., SVG-based) for latency over time and clearly mark failed checks; style it to match the app theme. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/diagnostics/DiagnosticsView.tsx",
+          "operation": "create",
+          "description": "Create the diagnostics view with a time-window selector (15m/1h/24h), the latency timeline, and a table of recent checks including timestamp, latency (if any), success/failure, and error category/message; compose shadcn/ui components (do not modify frontend/src/components/ui). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/diagnostics/timeWindow.ts",
+          "operation": "create",
+          "description": "Implement shared utilities for time-window selection and filtering/deriving displayed history deterministically (using timestamps)."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire DiagnosticsView into the app navigation/tabs and ensure it receives the correct history source (local samples when signed out, persisted history when signed in per REQ-6). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Provide stabilization settings (interval, timeout, retries, exponential backoff) and apply them live to connectivity checks with validation and sensible defaults.",
+      "acceptanceCriteria": [
+        "Settings include at minimum: interval (seconds), timeout (ms), max retries, backoff base delay (ms), and backoff multiplier.",
+        "Changes take effect without requiring a full page refresh.",
+        "UI prevents invalid values (e.g., negative numbers) and provides sensible bounds/defaults."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/settings/settingsTypes.ts",
+          "operation": "create",
+          "description": "Define stabilization settings types, defaults, and validation bounds (min/max) for interval, timeout, retries, base delay, and multiplier."
+        },
+        {
+          "path": "frontend/src/features/settings/settingsStorage.ts",
+          "operation": "create",
+          "description": "Implement local persistence for stabilization settings (e.g., localStorage) with safe parsing and fallback to defaults."
+        },
+        {
+          "path": "frontend/src/features/settings/SettingsView.tsx",
+          "operation": "create",
+          "description": "Create a settings panel UI with validated numeric inputs (prevent negatives, enforce bounds) for interval/timeout/retries/backoff parameters; compose shadcn/ui form components (do not modify frontend/src/components/ui). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/monitoring/useConnectivityMonitor.ts",
+          "operation": "modify",
+          "description": "Apply settings to the monitoring loop: interval scheduling, per-check timeout, retry count, and exponential backoff timing; ensure changes take effect without refresh."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire SettingsView into navigation/tabs and connect its state to the connectivity monitor so updates apply immediately. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add export/import utilities and clear-history action with confirmation; export supports CSV/JSON for a selected range.",
+      "acceptanceCriteria": [
+        "Export generates a file download (CSV and/or JSON) containing timestamps and metrics for the selected range.",
+        "Clear history requires confirmation and updates the UI immediately after success.",
+        "If backend storage is used, export reflects persisted history (not only in-memory)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/export/exportFormats.ts",
+          "operation": "create",
+          "description": "Implement CSV and JSON serialization for measurements including timestamps and key metrics, compatible with both local and persisted history sources."
+        },
+        {
+          "path": "frontend/src/features/export/fileDownload.ts",
+          "operation": "create",
+          "description": "Implement browser file download utilities (Blob + object URL) to save exported CSV/JSON files locally."
+        },
+        {
+          "path": "frontend/src/features/export/ImportExportPanel.tsx",
+          "operation": "create",
+          "description": "Create an import/export UI panel: export for selected time window, optional JSON import into local-only history for diagnostics, and a clear-history action with confirmation dialog; compose shadcn/ui components (do not modify frontend/src/components/ui). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/diagnostics/DiagnosticsView.tsx",
+          "operation": "modify",
+          "description": "Add the ImportExportPanel to the diagnostics view, ensuring export uses the currently selected time window and the correct history source (persisted when available per REQ-6). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Wire persistence, history retrieval, and clearing via React Query with graceful signed-out behavior and loading/error states.",
+      "acceptanceCriteria": [
+        "When signed in, measurements are persisted and history loads from the backend.",
+        "When not signed in, the app still performs local checks and shows current status, and the UI clearly indicates that persistence/history is limited until sign-in.",
+        "All canister calls show non-blocking loading states and human-readable error messages on failure."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/auth/LoginButton.tsx",
+          "operation": "create",
+          "description": "Create a login/logout button using the existing Internet Identity hook, and clear React Query cache on logout (per selected authorization component guidance). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/profile/ProfileSetupModal.tsx",
+          "operation": "create",
+          "description": "Create a first-login profile setup modal to ask for a human-readable name and save it; avoid modal flash by following the selected authorization component guidance for profile query loading state. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/profile/queries.ts",
+          "operation": "create",
+          "description": "Create React Query hooks for getCallerUserProfile/saveCallerUserProfile and expose derived UI state for showing the profile setup modal. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/history/networkHistoryMapper.ts",
+          "operation": "create",
+          "description": "Implement mapping between frontend measurement records and the canister NetworkCheckResult type (e.g., latency -> pingTimeMs, timestamps/checkId, errorMessages, resultCode), keeping UI sorting deterministic by timestamp."
+        },
+        {
+          "path": "frontend/src/features/history/queries.ts",
+          "operation": "create",
+          "description": "Create React Query hooks for reading history and clearing history using the existing actor hook; include loading/error state, and ensure signed-out behavior consistently skips persisted calls and falls back to local-only history. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/history/mutations.ts",
+          "operation": "create",
+          "description": "Create React Query mutations for persisting new measurements and clearing persisted history; implement non-blocking UI feedback and human-readable error messages. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/monitoring/useConnectivityMonitor.ts",
+          "operation": "modify",
+          "description": "Integrate optional persistence: when authenticated, enqueue successful/failed checks for saving via the React Query mutation; when not authenticated, keep all functionality local and expose a clear UI indicator that persistence/history is limited until sign-in."
+        },
+        {
+          "path": "frontend/src/features/dashboard/DashboardView.tsx",
+          "operation": "modify",
+          "description": "Show signed-in vs signed-out state messaging (persistence limited until sign-in), and display non-blocking save/load error messaging when persistence is enabled. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire LoginButton and ProfileSetupModal into the header/app shell; ensure views use React Query-powered persisted history when authenticated and local history otherwise, with clear loading/error states. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Apply a coherent technical monitoring theme (not blue/purple by default) consistently across navigation, cards, charts/tables, and form controls with clear information hierarchy.",
+      "acceptanceCriteria": [
+        "Theme is applied consistently to navigation, cards, charts/tables, and form controls.",
+        "Theme does not use a blue-and-purple palette by default.",
+        "Layout includes clear information hierarchy with primary status prominent and secondary diagnostics/settings accessible via navigation or tabs."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.css",
+          "operation": "modify",
+          "description": "Adjust CSS variables (colors/typography/chart palette) to a cohesive monitoring theme that avoids a blue-and-purple default palette (e.g., charcoal + teal/green + amber for warnings), ensuring shadcn/ui tokens remain compatible."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Ensure layout hierarchy: prominent top status area, secondary tabs for Diagnostics/Settings, consistent spacing/typography across views. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/dashboard/DashboardView.tsx",
+          "operation": "modify",
+          "description": "Apply consistent themed card/table styles and status color semantics (Stable/Degraded/Offline) aligned with the global theme tokens. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/diagnostics/DiagnosticsView.tsx",
+          "operation": "modify",
+          "description": "Apply consistent themed chart/table styling and clear visual distinction for failed checks. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/settings/SettingsView.tsx",
+          "operation": "modify",
+          "description": "Apply consistent themed form control styling and validation states using composed shadcn/ui components (without modifying frontend/src/components/ui). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Add minimal static branding assets (icon and hero/empty-state illustration) and render them as static frontend files.",
+      "acceptanceCriteria": [
+        "Generated images are placed in frontend/public/assets/generated and referenced directly by the UI.",
+        "App uses the icon in the header and uses the illustration in at least one empty/loading/intro state.",
+        "Assets load without requiring any backend image serving."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/net-stabilizer-icon.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated app icon asset at frontend/public/assets/generated/net-stabilizer-icon.dim_256x256.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/net-stabilizer-hero.dim_1400x800.png",
+          "operation": "create",
+          "description": "Add the generated hero/empty-state illustration at frontend/public/assets/generated/net-stabilizer-hero.dim_1400x800.png."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Render the icon in the header and use the hero illustration in an intro/empty state (e.g., no persisted history yet or signed-out limitation messaging), referencing the static files at frontend/public/assets/generated/net-stabilizer-icon.dim_256x256.png and frontend/public/assets/generated/net-stabilizer-hero.dim_1400x800.png. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/dashboard/DashboardView.tsx",
+          "operation": "modify",
+          "description": "Use the hero/illustration in at least one empty/loading/intro state within the dashboard content area, referencing frontend/public/assets/generated/net-stabilizer-hero.dim_1400x800.png. Verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

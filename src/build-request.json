@@ -1,0 +1,171 @@
+{
+  "kind": "build_request",
+  "title": "Network Stabilizer: connectivity monitor, diagnostics, and stability settings",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a network stabilizer dashboard that continuously evaluates the user’s network stability by running periodic connectivity checks (client-side) and displaying key metrics: online/offline status, request success rate, average latency, jitter (latency variance), and recent error counts.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A network stabilizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "App shows an always-visible current status indicator (e.g., Stable / Degraded / Offline) derived from recent measurements.",
+        "Connectivity checks run on an interval (configurable) without using WebSockets.",
+        "UI displays at minimum: average latency, jitter, success rate, and last successful check timestamp.",
+        "When the browser is offline (navigator.onLine=false), UI reflects Offline immediately and pauses/fails checks gracefully."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement a backend canister API to persist network check results per authenticated user (Internet Identity) and provide history retrieval and deletion.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A network stabilizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes methods to: add a measurement, list recent measurements (bounded), and clear a user’s measurements.",
+        "Measurements are stored per caller principal and are not accessible across users.",
+        "Returned history is ordered newest-first or includes timestamps so the UI can sort deterministically.",
+        "All public methods handle unauthenticated callers by returning an error or empty data consistently (choose one and apply consistently)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add a diagnostics view that helps users identify instability sources by showing a timeline/chart of recent measurements and a table of recent failures including error type and timestamp.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A network stabilizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Diagnostics view includes a chart (or sparkline-style visualization) for latency over time and indicates failed checks.",
+        "A table lists recent checks with: timestamp, latency (if available), success/failure, and error category/message.",
+        "User can choose a time window (e.g., last 15 min / 1 hr / 24 hr) that changes the displayed history (within stored bounds)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Provide a “stabilization” settings panel that lets users tune client behavior for unstable networks: check interval, request timeout, retry count, and exponential backoff parameters; apply these settings to the connectivity checks.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A network stabilizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Settings include at minimum: interval (seconds), timeout (ms), max retries, backoff base delay (ms), and backoff multiplier.",
+        "Changes take effect without requiring a full page refresh.",
+        "UI prevents invalid values (e.g., negative numbers) and provides sensible bounds/defaults."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add export/import utilities: allow exporting the user’s measurement history to a downloadable CSV/JSON file and clearing history from the UI (with confirmation).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A network stabilizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Export generates a file download (CSV and/or JSON) containing timestamps and metrics for the selected range.",
+        "Clear history requires confirmation and updates the UI immediately after success.",
+        "If backend storage is used, export reflects persisted history (not only in-memory)."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Implement frontend-backend wiring using React Query for: writing measurements to the canister, reading history, and clearing history, with loading/error states and graceful degradation when not signed in.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A network stabilizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When signed in, measurements are persisted and history loads from the backend.",
+        "When not signed in, the app still performs local checks and shows current status, and the UI clearly indicates that persistence/history is limited until sign-in.",
+        "All canister calls show non-blocking loading states and human-readable error messages on failure."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Choose and apply a coherent visual theme for the app UI (colors, typography, layout) appropriate for a technical monitoring tool, and use it consistently across all views.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A network stabilizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Theme is applied consistently to navigation, cards, charts/tables, and form controls.",
+        "Theme does not use a blue-and-purple palette by default.",
+        "Layout includes clear information hierarchy with primary status prominent and secondary diagnostics/settings accessible via navigation or tabs."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Generate and include minimal static branding assets for the app (icon and a simple hero/empty-state illustration) and render them from the frontend as static files.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "A network stabilizer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Generated images are placed in frontend/public/assets/generated and referenced directly by the UI.",
+        "App uses the icon in the header and uses the illustration in at least one empty/loading/intro state.",
+        "Assets load without requiring any backend image serving."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor with all logic in the main actor file (no multi-service architecture).",
+    "Do not modify any files under frontend/src/components/ui (compose them instead).",
+    "Do not edit immutable hook/bootstrap paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx."
+  ],
+  "nonGoals": [
+    "No router-level traffic shaping/VPN/proxy functionality at the OS/network layer.",
+    "No WebSocket-based real-time streaming features.",
+    "No third-party authentication providers beyond Internet Identity.",
+    "No external databases or cloud services for storage/analytics."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Minimal line-art app icon showing a network node with stabilizing ring (net-stabilizer-icon.dim_256x256.png)",
+      "Simple hero/empty-state illustration of a dashboard with signal waves and a caution/repair motif (net-stabilizer-hero.dim_1400x800.png)"
+    ],
+    "edits": []
+  }
+}
